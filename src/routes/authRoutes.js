@@ -9,7 +9,7 @@ const {
 
 const authRouter = express.Router();
 
-authRouter.post("/user/sigup", registerUser);
+authRouter.post("/user/signup", registerUser);
 authRouter.post("/user/login", loginUser);
 authRouter.post("/admin/login", AdminloginUser);
 authRouter.post("/user/logout", logoutUser);

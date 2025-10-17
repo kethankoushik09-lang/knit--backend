@@ -3,6 +3,7 @@ const Task = require("../models/Task.js");
 async function getTasks(req, res) {
   try {
     const tasks = await Task.find({ user: req.user._id });
+    
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -11,6 +12,8 @@ async function getTasks(req, res) {
 
 async function createTask(req, res) {
   try {
+    console.log("create task");
+    
     const { title, description } = req.body;
     const newtask = new Task({ title, description, user: req.user._id });
     const task = await newtask.save();
@@ -22,6 +25,8 @@ async function createTask(req, res) {
 }
 
 async function updateTask(req, res) {
+  console.log("update task");
+  
   try {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: "Task not found" });

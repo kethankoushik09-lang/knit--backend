@@ -3,10 +3,12 @@ const { generateToken } = require("../utils/generateToken");
 const bcrypt = require("bcrypt");
 const Task = require("../models/Task");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 async function registerUser(req, res) {
   try {
     const { name, email, password } = req.body;
-    console.log(req.body);
+
     const salt = await bcrypt.genSalt(10);
     const hashpassword = await bcrypt.hash(password, salt);
     const newUser = new User({ name, email, password: hashpassword });
@@ -16,11 +18,12 @@ async function registerUser(req, res) {
 
     res.cookie("usertoken", token, {
       httpOnly: true,
-      sameSite: "Lax",
+      secure: isProduction, // true in production
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(201).json({ success: true, message: "User created", user });
+    res.status(201).json({ success: true, message: "User created", user, tasks: [] });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -28,31 +31,28 @@ async function registerUser(req, res) {
 
 async function loginUser(req, res) {
   try {
-    console.log("user-loggout");
-    
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) {
+    if (!user)
       return res.status(401).json({ message: "Invalid email or password" });
-    }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
+    if (!isValidPassword)
       return res.status(401).json({ message: "Invalid email or password" });
-    }
 
-    const token = generateToken(user._id);
+    const token = await generateToken(user._id);
 
     res.cookie("usertoken", token, {
       httpOnly: true,
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
     const tasks = await Task.find({ user: user._id }).select("-__v");
 
-
-    res.status(200).json({ success: true, message: "User logged-in", tasks,user});
+    res.status(200).json({ success: true, message: "User logged-in", tasks, user });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -62,32 +62,27 @@ async function AdminloginUser(req, res) {
   try {
     const { email, password } = req.body;
 
-    // Check if email matches admin credentials
-    if (email !== process.env.ADMIN_MAIL) {
+    if (email !== process.env.ADMIN_MAIL)
       return res.status(401).json({ message: "Invalid email or password" });
-    }
 
-    // Compare password with the one in env
     const isValidPassword = password === process.env.ADMIN_PASSWORD;
-
-    if (!isValidPassword) {
+    if (!isValidPassword)
       return res.status(401).json({ message: "Invalid email or password" });
-    }
 
-    // Generate JWT token with 'admin' role
     const token = await generateToken(email);
 
     res.cookie("admintoken", token, {
       httpOnly: true,
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     const userStats = await Task.aggregate([
       {
         $lookup: {
           from: "users",
-          localField: "user", // Task.user → User._id
+          localField: "user",
           foreignField: "_id",
           as: "userDetails",
         },
@@ -129,11 +124,13 @@ async function AdminloginUser(req, res) {
   }
 }
 
-// authController.js
 async function logoutUser(req, res) {
   try {
-    // Clear the user cookie
-    res.clearCookie("usertoken", { httpOnly: true, sameSite: "Lax" });
+    res.clearCookie("usertoken", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.status(200).json({ success: true, message: "User logged out successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -142,8 +139,11 @@ async function logoutUser(req, res) {
 
 async function logoutAdmin(req, res) {
   try {
-    // Clear the admin cookie
-    res.clearCookie("admintoken", { httpOnly: true, sameSite: "Lax" });
+    res.clearCookie("admintoken", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.status(200).json({ success: true, message: "Admin logged out successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

@@ -15,6 +15,6 @@ taskRouter.post("/add", protect, createTask);
 
 taskRouter.put("/update/:id", protect, updateTask);
 
-taskRouter.delete("delete/:id", protect, deleteTask);
+taskRouter.delete("/delete/:id", protect, deleteTask);
 
 module.exports = taskRouter;
