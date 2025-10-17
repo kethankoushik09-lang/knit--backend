@@ -1,6 +1,5 @@
 const express = require("express");
 const dotenv = require("dotenv");
-// const morgan = require("morgan");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
@@ -18,11 +17,6 @@ app.use(cookieParser())
 app.use(express.json());
 
 
-// app.use(cors({
-//     origin:["http://localhost:5173","https://knite-web.vercel.app"],
-//     credentials:true
-// }));
-// // app.use(morgan("dev"));
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -31,7 +25,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback){
-    // allow requests with no origin (like Postman)
     if(!origin) return callback(null, true);
     if(allowedOrigins.indexOf(origin) === -1){
       const msg = "CORS error: origin not allowed";
@@ -41,13 +34,6 @@ app.use(cors({
   },
   credentials: true
 }));
-
-// Handle preflight requests
-// app.options("*", cors({
-//   origin: allowedOrigins,
-//   credentials: true
-// }));
-
 
 
 app.use("/api/auth", authRoutes);

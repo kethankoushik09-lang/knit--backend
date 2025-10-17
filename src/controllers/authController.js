@@ -18,9 +18,9 @@ async function registerUser(req, res) {
 
     res.cookie("usertoken", token, {
       httpOnly: true,
-      secure: isProduction, // true in production
+      secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     res.status(201).json({ success: true, message: "User created", user, tasks: [] });
