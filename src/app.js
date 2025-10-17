@@ -20,9 +20,14 @@ app.use(cors({
 }));
 // app.use(morgan("dev"));
 
+
 app.use("/api/auth", authRoutes);
 app.use("/api/task", taskRoutes);
 
 app.use(errorHandler);
 
+
+app.get("/",(req,res)=>{
+    res.send("kethan");
+})
 module.exports = app;
