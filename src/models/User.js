@@ -37,16 +37,11 @@ const userSchema = new mongoose.Schema(
         message: "its not a valid password",
       },
     }
-    // role: {
-    //   type: String,
-    //   enum: ["user", "admin"],
-    //   default: "user",
-    // },
+   
   },
   { timestamps: true }
 );
 
-// Method to match password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
