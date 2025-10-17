@@ -43,10 +43,10 @@ app.use(cors({
 }));
 
 // Handle preflight requests
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+// app.options("*", cors({
+//   origin: allowedOrigins,
+//   credentials: true
+// }));
 
 
 
